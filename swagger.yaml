@@ -1,24 +1,71 @@
 openapi: 3.0.0
 info:
-  title: Sample API
-  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
-  version: 0.1.9
+  title: xcoring API
+  description: xcoring - machine learning products and explainable AI to do real-time credit underwriting. Ask for a demo at [https://www.xcoring.ai/]()
+  version: 1.0.0
+  termsOfService: https://xcoring.ai/terms/
+  contact:
+    email: api@xcoring.ai
 servers:
-  - url: http://api.example.com/v1
-    description: Optional server description, e.g. Main (production) server
-  - url: http://staging-api.example.com
-    description: Optional server description, e.g. Internal staging server for testing
+  - url: https://api.xcoring.ai/v1
+tags:
+- name: "risk"
+  description: "Risk Scoring for Credit Underwriting"
+- name: "history"
+  description: "Historic previously calculated reports"
 paths:
-  /users:
+  /risk/score:
     get:
-      summary: Returns a list of users.
-      description: Optional extended description in CommonMark or HTML.
+      tags:
+        - "risk"
+      summary: "Calculate a new report for credit risk calculation."
+      parameters:
+        - in: query
+          name: uid
+          schema:
+            type: string
+          required: true
+          description: "Unique id for the person to request the report. Eg: In Argentina, the persons CUIT."
+        - in: query
+          name: month
+          schema:
+            type: string
+          required: false
+          description: "Month from which you want to predict. YYYY-MM format. Defaults to current month."
       responses:
         '200':    # status code
-          description: A JSON array of user names
+          description: Full body of the report
           content:
             application/json:
               schema: 
-                type: array
-                items: 
-                  type: string
+                $ref: "#/components/schemas/risk_report"
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+  schemas:
+    risk_report:
+      type: object
+      properties: 
+        base_month: 
+          type: string
+          example: "2020-06-01"
+        personal_information:
+          type: object
+          properties:
+            name: 
+              type: string
+              example: "Pedro Perez"
+            uid:
+              type: string
+              example: "20123456786a"
+        xcore:
+          type: object
+          properties:
+            value:
+              type: integer
+              example: 787
+            
+security:
+  - bearerAuth: []
